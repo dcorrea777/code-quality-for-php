@@ -1,0 +1,28 @@
+name: Pull request
+on:
+    workflow_dispatch:
+    pull_request_target:
+        types:
+            - labeled
+            - synchronize
+            - opened
+            - edited
+
+jobs:
+    dependencies:
+        uses: ./.github/workflows/dependencies.yml
+    code-quality:
+        needs: dependencies
+        uses: ./.github/workflows/code-quality.yml
+    build:
+        name: build
+        runs-on: ubuntu-latest
+        if: ${{ github.event.pull_request && contains(github.event.pull_request.labels.*.name, 'provisioning') }}
+        timeout-minutes: 1
+        steps:
+            -
+                name: Check out repository code
+                uses: actions/checkout@v2
+            -
+                name: "build"
+                run: ls -la
