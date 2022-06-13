@@ -14,15 +14,43 @@ jobs:
     code-quality:
         needs: dependencies
         uses: ./.github/workflows/code-quality.yml
-    build:
-        name: build
-        runs-on: ubuntu-latest
+    provision:
+        name: provision from PRs
+        needs: code-quality
         if: ${{ github.event.pull_request && contains(github.event.pull_request.labels.*.name, 'provisioning') }}
+        runs-on: ubuntu-latest
         timeout-minutes: 1
         steps:
             -
                 name: Check out repository code
                 uses: actions/checkout@v2
             -
-                name: "build"
-                run: ls -la
+                name: get open pull_request
+                id: set-result
+                uses: actions/github-script@v6
+                with:
+                    script: |
+                        const openPulls = await github.rest.pulls.list({
+                            owner: context.repo.owner,
+                            repo: context.repo.repo
+                        })
+
+                        const openPullsWithProvisioning = openPulls
+                            .data
+                            .filter(pr => pr.labels.filter(label => label.name === 'provisioning').length)
+                            .map(pr => pr.head.ref)
+
+                        return JSON.stringify({ prs: openPullsWithProvisioning })
+            -
+                name: open PRs
+                run: echo "${{steps.set-result.outputs.result}}"
+            -
+                uses: actions/github-script@v6
+                with:
+                    script: |
+                        github.rest.issues.createComment({
+                            issue_number: context.issue.number,
+                            owner: context.repo.owner,
+                            repo: context.repo.repo,
+                            body: '👋 Thanks for your PR! 🔥 The staging environment has already been provisioned 🔥 link is: http://autodoc.com.br'
+                        })
