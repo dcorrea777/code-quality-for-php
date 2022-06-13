@@ -1,0 +1,80 @@
+name: Code quality
+
+on: workflow_call
+
+jobs:
+    phpunit:
+        name: phpunit
+        runs-on: ubuntu-latest
+        timeout-minutes: 1
+        steps:
+            -
+                name: Check out repository code
+                uses: actions/checkout@v2
+            -
+                name: "Determine composer cache directory"
+                id: "determine-composer-cache-directory"
+                run: "echo \"::set-output name=directory::$(composer config cache-dir)\""
+            -
+                name: "Cache dependencies installed with composer"
+                uses: "actions/cache@v2.0.0"
+                with:
+                    path: "${{ steps.determine-composer-cache-directory.outputs.directory }}"
+                    key: "php-8.1-composer-${{ hashFiles('composer.json') }}"
+                    restore-keys: "php-8.1-composer-${{ hashFiles('composer.json') }}"
+            -
+                name: Install composer
+                run: composer install --prefer-dist
+            -
+                name: PHPUnit
+                run: composer phpunit
+    phpcs:
+        name: phpcs
+        runs-on: ubuntu-latest
+        timeout-minutes: 1
+        steps:
+            -
+                name: Check out repository code
+                uses: actions/checkout@v2
+            -
+                name: "Determine composer cache directory"
+                id: "determine-composer-cache-directory"
+                run: "echo \"::set-output name=directory::$(composer config cache-dir)\""
+            -
+                name: "Cache dependencies installed with composer"
+                uses: "actions/cache@v2.0.0"
+                with:
+                    path: "${{ steps.determine-composer-cache-directory.outputs.directory }}"
+                    key: "php-8.1-composer-${{ hashFiles('composer.json') }}"
+                    restore-keys: "php-8.1-composer-${{ hashFiles('composer.json') }}"
+            -
+                name: Install composer
+                run: composer install --prefer-dist
+            -
+                name: PHP Code Sniffer
+                run: composer phpcs
+    phpstan:
+        name: phpstan
+        runs-on: ubuntu-latest
+        timeout-minutes: 1
+        steps:
+            -
+                name: Check out repository code
+                uses: actions/checkout@v2
+            -
+                name: "Determine composer cache directory"
+                id: "determine-composer-cache-directory"
+                run: "echo \"::set-output name=directory::$(composer config cache-dir)\""
+            -
+                name: "Cache dependencies installed with composer"
+                uses: "actions/cache@v2.0.0"
+                with:
+                    path: "${{ steps.determine-composer-cache-directory.outputs.directory }}"
+                    key: "php-8.1-composer-${{ hashFiles('composer.json') }}"
+                    restore-keys: "php-8.1-composer-${{ hashFiles('composer.json') }}"
+            -
+                name: Install composer
+                run: composer install --prefer-dist
+            -
+                name: PHP Stan
+                run: composer phpstan
