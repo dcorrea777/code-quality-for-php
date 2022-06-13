@@ -1,0 +1,10 @@
+name: Continuous Integration
+
+on: [workflow_dispatch, push]
+
+jobs:
+    dependencies:
+        uses: ./.github/workflows/dependencies.yml
+    code-quality:
+        needs: dependencies
+        uses: ./.github/workflows/code-quality.yml

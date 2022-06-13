@@ -1,0 +1,37 @@
+name: Dependencies
+
+on: workflow_call
+
+jobs:
+    composer:
+        name: composer
+        runs-on: ubuntu-latest
+        timeout-minutes: 5
+        steps:
+            -
+                name: Check out repository code
+                uses: actions/checkout@v2
+            -
+                name: Install PHP
+                uses: shivammathur/setup-php@v2
+                with:
+                    php-version: 8.1
+                    coverage: none
+                    tools: pecl
+            -
+                name: "Determine composer cache directory"
+                id: "determine-composer-cache-directory"
+                run: "echo \"::set-output name=directory::$(composer config cache-dir)\""
+            -
+                name: Install composer
+                run: composer install --prefer-dist
+            -
+                name: "Validate composer.json and composer.lock"
+                run: "composer validate --strict"
+            -
+                name: "Cache dependencies installed with composer"
+                uses: "actions/cache@v2.0.0"
+                with:
+                    path: "${{ steps.determine-composer-cache-directory.outputs.directory }}"
+                    key: "php-8.1-composer-${{ hashFiles('composer.json') }}"
+                    restore-keys: "php-8.1-composer-${{ hashFiles('composer.json') }}"

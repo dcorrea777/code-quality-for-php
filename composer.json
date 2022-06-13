@@ -1,6 +1,8 @@
 {
     "name": "dcorrea/code-quality-for-php",
     "type": "project",
+    "license": "proprietary",
+    "description": "test project",
     "autoload": {
         "psr-4": {
             "App\\": "src/"
