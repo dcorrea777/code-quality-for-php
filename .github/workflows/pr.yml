@@ -16,6 +16,7 @@ jobs:
         uses: ./.github/workflows/code-quality.yml
     build:
         name: build
+        needs: code-quality
         runs-on: ubuntu-latest
         if: ${{ github.event.pull_request && contains(github.event.pull_request.labels.*.name, 'provisioning') }}
         timeout-minutes: 1
@@ -24,5 +25,5 @@ jobs:
                 name: Check out repository code
                 uses: actions/checkout@v2
             -
-                name: "build"
+                name: build
                 run: ls -la
