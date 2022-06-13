@@ -1,6 +1,11 @@
 name: Continuous Integration
 
-on: [workflow_dispatch, push]
+on:
+    workflow_dispatch:
+    push:
+        branches-ignore:
+            - 'main'
+            - 'develop'
 
 jobs:
     dependencies:
