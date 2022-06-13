@@ -1,0 +1,1 @@
+# code-quality-for-php
