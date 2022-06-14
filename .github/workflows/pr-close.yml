@@ -1,0 +1,43 @@
+name: Close pull request
+on:
+    workflow_dispatch:
+    pull_request_target:
+        branches:
+            - main
+        types:
+            - closed
+            - unlabeled
+
+jobs:
+    provision:
+        name: provision from PRs
+        if: ${{ github.event.pull_request.action == 'closed' }}
+        runs-on: ubuntu-latest
+        timeout-minutes: 1
+        steps:
+            -
+                name: github context
+                run: echo "$GITHUB_CONTEXT"
+            -
+                name: Check out repository code
+                uses: actions/checkout@v2
+            -
+                name: get open pull_request
+                id: set-result
+                uses: actions/github-script@v6
+                with:
+                    script: |
+                        const openPulls = await github.rest.pulls.list({
+                            owner: context.repo.owner,
+                            repo: context.repo.repo
+                        })
+
+                        const openPullsWithProvisioning = openPulls
+                            .data
+                            .filter(pr => pr.labels.filter(label => label.name === 'provisioning').length)
+                            .map(pr => pr.head.ref)
+
+                        return JSON.stringify({ prs: openPullsWithProvisioning })
+            -
+                name: open PRs
+                run: echo "${{steps.set-result.outputs.result}}"
